@@ -23,8 +23,8 @@ static const int DHT_SENSOR_PIN = 3;
 DHT_nonblocking dht_sensor(DHT_SENSOR_PIN, DHT_SENSOR_TYPE);
 
 //Valor de las mediciones de temperatura y humedad, se inicializan en valores normales para evitar problemas en los primeros ciclos
-float temperatura = 20;
-float humedad = 50;
+float temperatura;
+float humedad;
 
 /*
  * Fotoresistor
@@ -73,7 +73,7 @@ void setup()
  */
   pinMode(ledPin, OUTPUT);  // Declaramos el pin del led como salida
   pinMode(inputPin, INPUT); // Declaramos el pin del sensor como entrada
- pinMode(8, OUTPUT);
+  pinMode(8, OUTPUT);
   /*
  * DHT sensor
  */
@@ -160,7 +160,7 @@ void loop()
  */
 
   // Devuelve verdadero cuando la medicion esta disponible
-  measure_environment(&temperatura, &humedad);
+  bool medision = measure_environment(&temperatura, &humedad);
 
   /*
  * Fotoresistor
@@ -177,8 +177,10 @@ void loop()
   //Enviamos el json por el puerto serie
   String json = "{\"temperatura\":" + String(temperatura, 1) + ", \"humedad\":" + String(humedad, 1) + ", \"luz\":" + hayLuz + ", \"movimiento\":" + pirState + "}";
 
-  if (json != jsonAntiguo){
+  if (json != jsonAntiguo || medision){
+    
     Serial.println(json);
+    Serial.flush();
   }
 
   jsonAntiguo = json;
@@ -187,7 +189,9 @@ void loop()
 
   if (Serial.available() > 0)
   {
+    Serial.println("Quentrao");
     //leemos la opcion enviada
+    
     option = Serial.read();
 
     
