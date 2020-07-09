@@ -23,8 +23,11 @@ static const int DHT_SENSOR_PIN = 3;
 DHT_nonblocking dht_sensor(DHT_SENSOR_PIN, DHT_SENSOR_TYPE);
 
 //Valor de las mediciones de temperatura y humedad, se inicializan en valores normales para evitar problemas en los primeros ciclos
-float temperatura;
-float humedad;
+static float temperatura;
+static float humedad;
+
+float temperaturaTemp = 22;
+float humedadTemp = 22;
 
 /*
  * Fotoresistor
@@ -121,6 +124,7 @@ static bool measure_environment(float *temperature, float *humidity)
   {
     if (dht_sensor.measure(temperature, humidity) == true)
     {
+
       measurement_timestamp = millis();
       return (true);
     }
@@ -156,13 +160,6 @@ void loop()
   }
 
   /*
- * Sensor DHT
- */
-
-  // Devuelve verdadero cuando la medicion esta disponible
-  bool medision = measure_environment(&temperatura, &humedad);
-
-  /*
  * Fotoresistor
  */
 
@@ -174,43 +171,69 @@ void loop()
   else if (valorFotoresistor < 40)
     hayLuz = "false";
 
-  //Enviamos el json por el puerto serie
-  String json = "{\"temperatura\":" + String(temperatura, 1) + ", \"humedad\":" + String(humedad, 1) + ", \"luz\":" + hayLuz + ", \"movimiento\":" + pirState + "}";
-
-  if (json != jsonAntiguo || medision){
-    
-    Serial.println(json);
-    Serial.flush();
-  }
-
-  jsonAntiguo = json;
-
   //Posteriormente leemos los datos que hay en el puerto serie para leer las ordenes que lleguen
 
   if (Serial.available() > 0)
   {
-    Serial.println("Quentrao");
-    //leemos la opcion enviada
-    
-    option = Serial.read();
 
-    
-    if (option == 'v')
+    //leemos la opcion enviada
+
+    //option = Serial.read();
+
+    String data;
+    data = Serial.readString();
+
+    Serial.println(data);
+    Serial.flush();
+
+    if (data.equals("enviame"))
+    {
+      unsigned long tiempoinicial, tiempoIntermedio;
+      tiempoinicial = tiempoIntermedio = millis();
+
+      while (tiempoIntermedio - tiempoinicial < 10000ul)
+      {
+        /*
+        * Sensor DHT
+        */
+
+        bool medision = measure_environment(&temperatura, &humedad);
+
+        if (medision)
+        {
+          temperaturaTemp = temperatura;
+          humedadTemp = humedad;
+          break;
+        }
+        tiempoIntermedio = millis();
+      }
+
+      String json = "{\"temperatura\":" + String(temperatura) + ", \"humedad\":" + String(humedad) + ", \"luz\":" + hayLuz + ", \"movimiento\":" + pirState + "}";
+      Serial.println(json);
+      Serial.flush();
+    }
+    else if (data == "v")
     {
       //Conectar servomotor
       digitalWrite(8, HIGH);
-
-
-      Serial.println("Abrir ventana");
-    }else if ((option-'0') >= 1 && (option-'0') <= 9)
+      Serial.println("OK");
+    }
+    else if (data.toInt() != 0)
     {
-      int puertoRele = option-'0';
 
-      digitalWrite(8, LOW);
+      long pin = data.toInt();
+
+      if (pin <= 10)
+        digitalWrite(8, HIGH);
+      if (pin > 10)
+        digitalWrite(8, LOW);
       //Conectar Reles
 
-      Serial.print("Activar/Descativar Rele ");
-      Serial.println(puertoRele);
+      Serial.println("OK");
+    }
+    else
+    { //Ninguna orden coincide
+      Serial.println("No");
     }
   }
 }
