@@ -14,7 +14,7 @@
             "forcedInclude": [
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
             ],
-            "defines": [
+            "defines": [ 
                 "USBCON"
             ],
             "intelliSenseMode": "msvc-x64"
