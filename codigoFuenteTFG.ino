@@ -1,7 +1,7 @@
 #include <dht_nonblocking.h>
 #include <Servo.h>
 
-/*
+/* 
  * Defines
  */
 #define DHT_SENSOR_TYPE DHT_TYPE_11
