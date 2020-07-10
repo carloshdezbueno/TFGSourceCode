@@ -1,5 +1,3 @@
-
-
 #include <dht_nonblocking.h>
 #include <Servo.h>
 
