@@ -39,9 +39,10 @@ String hayLuz;
 /*
  * Servo motor
  */
-/* Servo myservo; // Creamos el objeto servo para controlar el servo
+
+Servo myservo; // Creamos el objeto servo para controlar el servo
 int pos = 0;   // Variable que almacena la posicion del servo
-static const int SERVO_MOTOR_PIN = 4; */
+static const int SERVO_MOTOR_PIN = 13;
 
 /*
  * Relés
@@ -82,8 +83,12 @@ void setup()
     /*
  * Servo motor
  */
-    //myservo.attach(SERVO_MOTOR_PIN); // Une el servo en el pin al objeto servo
+    myservo.attach(SERVO_MOTOR_PIN); // Une el servo en el pin al objeto servo
+    myservo.write(0);
+    delay(500);
+    pos = myservo.read();
 
+    
     /*
  * Relés
  */
@@ -210,10 +215,35 @@ void loop()
             Serial.println(json);
             Serial.flush();
         }
-        else if (data == "v")
+        else if (data.equals("abrirVentana"))
         {
-            //Conectar servomotor
-            digitalWrite(8, HIGH);
+            //Abre la ventana
+
+            if(pos != 180){
+                for (pos = myservo.read(); pos <= 180; pos += 1)
+                { // goes from 0 degrees to 180 degrees
+                    // in steps of 1 degree
+                    myservo.write(pos); // tell servo to go to position in variable 'pos'
+                    delay(15);          // waits 15ms for the servo to reach the position
+                }
+
+            }
+
+            Serial.println("OK");
+        }
+        else if (data.equals("cerrarVentana"))
+        {
+            //Cierra la ventana
+
+            if(pos != 0){
+
+                for (pos = myservo.read(); pos >= 0; pos -= 1)
+                {                       // goes from 180 degrees to 0 degrees
+                    myservo.write(pos); // tell servo to go to position in variable 'pos'
+                    delay(15);          // waits 15ms for the servo to reach the position
+                }
+            }
+
             Serial.println("OK");
         }
         else if (data.toInt() != 0)
