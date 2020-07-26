@@ -17,7 +17,7 @@ int val = 0;                    // Variable del estado de lectura del sensor
 /*
  * Sensor DHT
  */
-static const int DHT_SENSOR_PIN = 3;
+static const int DHT_SENSOR_PIN = 50;
 DHT_nonblocking dht_sensor(DHT_SENSOR_PIN, DHT_SENSOR_TYPE);
 
 //Valor de las mediciones de temperatura y humedad, se inicializan en valores normales para evitar problemas en los primeros ciclos
@@ -40,9 +40,9 @@ String hayLuz;
  * Servo motor
  */
 
-Servo myservo; // Creamos el objeto servo para controlar el servo
-int pos = 0;   // Variable que almacena la posicion del servo
-static const int SERVO_MOTOR_PIN = 13;
+Servo myservo;      // Creamos el objeto servo para controlar el servo
+static int pos = 0; // Variable que almacena la posicion del servo
+static const int SERVO_MOTOR_PIN = 49;
 
 /*
  * Relés
@@ -65,17 +65,25 @@ String jsonAntiguo = "";
 */
 int option;
 
+/*
+* Debug pin
+*/
+static const int debugPin = 51;
+
 void setup()
 {
     // Definimos el puerto serie
     Serial.begin(9600);
 
+    while(!Serial){
+
+    }
     /*
  * PIR sensor
  */
     pinMode(ledPin, OUTPUT);  // Declaramos el pin del led como salida
     pinMode(inputPin, INPUT); // Declaramos el pin del sensor como entrada
-    pinMode(8, OUTPUT);
+
     /*
  * DHT sensor
  */
@@ -88,15 +96,14 @@ void setup()
     delay(500);
     pos = myservo.read();
 
-    
     /*
  * Relés
  */
-    /* pinMode(rele_termostato, OUTPUT);
-  pinMode(rele_luz1, OUTPUT);
-  pinMode(rele_luz2, OUTPUT);
-  pinMode(rele_persiana1, OUTPUT);
-  pinMode(rele_persiana2, OUTPUT); */
+    int j;
+    for(j = 2; j<=40; j++){
+
+        pinMode(j, OUTPUT);
+    }
 
     /*
  * Fotoresistor
@@ -113,6 +120,11 @@ void setup()
     {
         hayLuz = "false";
     }
+
+    /*
+    * Debug pin
+    */
+    pinMode(debugPin, OUTPUT);
 }
 
 /*
@@ -219,14 +231,14 @@ void loop()
         {
             //Abre la ventana
 
-            if(pos != 180){
+            if (pos != 180)
+            {
                 for (pos = myservo.read(); pos <= 180; pos += 1)
                 { // goes from 0 degrees to 180 degrees
                     // in steps of 1 degree
                     myservo.write(pos); // tell servo to go to position in variable 'pos'
                     delay(15);          // waits 15ms for the servo to reach the position
                 }
-
             }
 
             Serial.println("OK");
@@ -235,7 +247,8 @@ void loop()
         {
             //Cierra la ventana
 
-            if(pos != 0){
+            if (pos != 0)
+            {
 
                 for (pos = myservo.read(); pos >= 0; pos -= 1)
                 {                       // goes from 180 degrees to 0 degrees
@@ -251,10 +264,13 @@ void loop()
 
             long pin = data.toInt();
 
-            if (pin <= 10)
-                digitalWrite(8, HIGH);
-            if (pin > 10)
-                digitalWrite(8, LOW);
+            if (pin >= 2 && pin <= 40)
+            {
+                digitalWrite(pin, !digitalRead(pin));
+            }
+            else
+                Serial.println("No");
+
             //Conectar Reles
 
             Serial.println("OK");
