@@ -112,11 +112,11 @@ void setup()
 
     calibracionFotoresistor = analogRead(pResistor);
 
-    if (calibracionFotoresistor > 50)
+    if (calibracionFotoresistor > 20)
     {
         hayLuz = "true";
     }
-    else if (calibracionFotoresistor <= 50)
+    else if (calibracionFotoresistor <= 20)
     {
         hayLuz = "false";
     }
@@ -180,10 +180,10 @@ void loop()
 
     valorFotoresistor = analogRead(pResistor); //Con el valor lo tratamos despues en el servicio que recibe los datos.
 
-    if (valorFotoresistor > 50)
+    if (valorFotoresistor > 20)
         hayLuz = "true";
 
-    else if (valorFotoresistor < 40)
+    else if (valorFotoresistor < 10)
         hayLuz = "false";
 
     //Posteriormente leemos los datos que hay en el puerto serie para leer las ordenes que lleguen
